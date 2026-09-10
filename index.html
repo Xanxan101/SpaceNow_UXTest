@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SpaceNow — Mobile Mockups</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="phone-stack">
+      <!-- ============ 1 · WELCOME ============ -->
+      <section class="phone is-active" id="screen-welcome">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen screen--welcome">
+          <div class="ph-box ph-box--logo">Logo lockup</div>
+
+          <h1>Book a space in three taps.</h1>
+          <p class="lede">
+            Desks, rooms, studios and shuttles — near you, right now.
+          </p>
+
+          <div class="stack-actions push-down">
+            <button class="btn btn--dark" data-goto="screen-form">
+              Continue with Apple
+            </button>
+            <button class="btn btn--outline" data-goto="screen-form">
+              Continue with Google
+            </button>
+            <button class="btn btn--outline" data-goto="screen-form">
+              Continue with Email
+            </button>
+            <button class="btn btn--fill" data-goto="screen-listing">
+              Browse without an account →
+            </button>
+            <p class="caption caption--center">Sign in needed only to confirm</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 2 · NEEDS FORM ============ -->
+      <section class="phone" id="screen-form">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen">
+          <div class="topbar">
+            <button class="linkbtn" data-goto="screen-welcome">← back</button>
+            <button class="linkbtn linkbtn--muted" data-goto="screen-listing">
+              skip
+            </button>
+          </div>
+
+          <h2>What do you need?</h2>
+
+          <div class="chips" data-chipgroup="type">
+            <button class="chip">Desk</button>
+            <button class="chip is-active">Room</button>
+            <button class="chip">Studio</button>
+            <button class="chip">Minibus</button>
+          </div>
+
+          <h3 class="field-label">For how many?</h3>
+          <div class="stepper" data-stepper>
+            <button class="stepper__btn" data-step="-1" aria-label="decrease">−</button>
+            <span class="stepper__value" data-step-value>2</span>
+            <button class="stepper__btn" data-step="1" aria-label="increase">+</button>
+          </div>
+
+          <h3 class="field-label">When?</h3>
+          <p class="subtext" data-bind="when-hint">We rank by what's actually free then</p>
+          <div class="chips" data-chipgroup="when">
+            <button class="chip is-active">Now</button>
+            <button class="chip">Today PM</button>
+            <button class="chip">Pick date</button>
+          </div>
+
+          <div class="push-down">
+            <p class="caption">8 spaces → 3 matches</p>
+            <button class="btn btn--dark" data-goto="screen-matches">
+              See my matches
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 3 · MATCHES ============ -->
+      <section class="phone" id="screen-matches">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen">
+          <div class="topbar">
+            <button class="linkbtn" data-goto="screen-form">← edit needs</button>
+            <span class="topbar__meta">Room · 2 · now</span>
+          </div>
+
+          <h2 data-bind="matches-title">Your 3 best fits</h2>
+
+          <div class="match-list" data-match-list></div>
+
+          <button class="btn btn--outline match-cta" data-goto="screen-listing">
+            Show all 8 spaces
+          </button>
+        </div>
+      </section>
+
+      <!-- ============ 4 · EXPLORE / LISTING ============ -->
+      <section class="phone" id="screen-listing">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen screen--flush">
+          <div class="searchbar">
+            <span class="searchbar__icon" aria-hidden="true">⌕</span>
+            <span class="searchbar__ph">Search spaces</span>
+          </div>
+
+          <div class="chips chips--scroll" data-chipgroup="filter">
+            <button class="chip is-active">All 8</button>
+            <button class="chip">Free now</button>
+            <button class="chip">4.5+ ★</button>
+            <button class="chip">Seats 4+</button>
+          </div>
+
+          <p class="sort-label">Sort: best match ▾ · 8 results</p>
+
+          <div class="space-list" data-space-list></div>
+
+          <button class="more-results" type="button" data-more>+ 3 more</button>
+
+          <nav class="bottom-nav">
+            <button class="is-active">Explore</button>
+            <button data-goto="screen-booked">Bookings</button>
+            <button>Saved</button>
+            <button>Profile</button>
+          </nav>
+        </div>
+      </section>
+
+      <!-- ============ 5 · SPACE DETAIL ============ -->
+      <section class="phone" id="screen-detail">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen screen--flush">
+          <div class="ph-box ph-box--stage" data-bind="photo">Space photo · 1 of 6</div>
+
+          <div class="screen__pad">
+            <div class="detail-head">
+              <h2 data-bind="name">Quiet Focus Pod</h2>
+              <span class="rating rating--lg" data-bind="rating">4.8 ★ <span>(61)</span></span>
+            </div>
+            <p class="meta meta--lg" data-bind="meta">Room · Floor 5 · seats 2 · $18/hr</p>
+
+            <div class="tag-row" data-bind="tags">
+              <span class="tag">Soundproof</span>
+              <span class="tag">Monitor</span>
+              <span class="tag">Whiteboard</span>
+            </div>
+
+            <h3 class="field-label">Availability today</h3>
+            <div class="hours" data-hours></div>
+            <p class="alert alert--sm" data-bind="alert">
+              Low availability — usually booked by 10am
+            </p>
+
+            <h3 class="field-label">Duration</h3>
+            <div class="chips" data-chipgroup="duration">
+              <button class="chip">30m</button>
+              <button class="chip is-active">1 hr</button>
+              <button class="chip">2 hr</button>
+              <button class="chip">Half day</button>
+            </div>
+          </div>
+
+          <div class="checkout-bar">
+            <span class="checkout-bar__price">$18 · 14:00–15:00</span>
+            <button class="btn btn--dark btn--inline" data-goto="screen-signin">
+              Continue
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 6 · SIGN IN ============ -->
+      <section class="phone" id="screen-signin">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen">
+          <div class="topbar">
+            <button class="linkbtn" data-goto="screen-detail">← back</button>
+            <span class="topbar__meta">Step 1/2</span>
+          </div>
+
+          <h2>Nearly there — who's this for?</h2>
+
+          <div class="held-pill">
+            <span data-bind="held">Quiet Focus Pod · Tue 14:00</span>
+            <span class="held-pill__timer">held 8:59</span>
+          </div>
+
+          <p class="lede lede--sm">
+            We only need an account to issue your door code and receipt.
+          </p>
+
+          <div class="stack-actions">
+            <button class="btn btn--dark" data-goto="screen-confirm">
+              Continue with Apple
+            </button>
+            <button class="btn btn--outline" data-goto="screen-confirm">
+              Continue with Google
+            </button>
+            <input class="field" type="email" placeholder="Email address" />
+            <input class="field" type="password" placeholder="Password" />
+            <button class="btn btn--outline" data-goto="screen-confirm">
+              Sign in with Email
+            </button>
+          </div>
+
+          <p class="caption caption--center push-down">
+            Your slot is held while you sign in
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ 7 · CONFIRM ============ -->
+      <section class="phone" id="screen-confirm">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen">
+          <div class="topbar">
+            <button class="linkbtn" data-goto="screen-signin">← back</button>
+            <span class="topbar__meta">Step 2/2</span>
+          </div>
+
+          <h2>Confirm booking</h2>
+
+          <div class="summary-card">
+            <div class="summary-card__row">
+              <div class="ph-box ph-box--thumb">Photo</div>
+              <div>
+                <h4 data-bind="name">Quiet Focus Pod</h4>
+                <p class="meta" data-bind="meta">Floor 5 · seats 2</p>
+              </div>
+            </div>
+            <div class="summary-card__foot">
+              <span data-bind="datetime">Tue 9 Sep, 14:00–15:00</span>
+              <button class="linkbtn linkbtn--muted" data-goto="screen-detail">
+                edit
+              </button>
+            </div>
+          </div>
+
+          <div class="bill" data-bind="bill">
+            <div class="bill__row"><span>1 hr × $18</span><span>$18.00</span></div>
+            <div class="bill__row"><span>Service fee</span><span>$1.50</span></div>
+            <div class="bill__row bill__row--total">
+              <span>Total</span><span>$19.50</span>
+            </div>
+          </div>
+
+          <div class="pay-row">
+            <span>•••• 4242</span>
+            <button class="linkbtn linkbtn--muted">change</button>
+          </div>
+
+          <div class="push-down">
+            <p class="caption caption--center" data-bind="cancel">
+              Free cancellation until 13:00
+            </p>
+            <button class="btn btn--accent" data-goto="screen-booked" data-bind="paybtn">
+              Confirm &amp; pay $19.50
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 8 · BOOKED ============ -->
+      <section class="phone" id="screen-booked">
+        <header class="statusbar">
+          <span class="time">9:41</span>
+          <span class="signal" aria-hidden="true"></span>
+        </header>
+
+        <div class="screen screen--flush screen--center">
+          <div class="screen__pad">
+            <div class="success-mark" aria-hidden="true">✓</div>
+            <h2 class="h2--center">You're booked</h2>
+            <p class="subline" data-bind="space">Quiet Focus Pod · Floor 5</p>
+            <p class="subline" data-bind="datetime">Tue 9 Sep, 14:00–15:00</p>
+
+            <div class="qr-wrap">
+              <div class="ph-box ph-box--qr">QR door code</div>
+              <p class="caption caption--center">
+                Works offline · valid 13:45–15:15
+              </p>
+            </div>
+
+            <div class="dual-btns">
+              <button class="btn btn--outline btn--sm">Directions</button>
+              <button class="btn btn--outline btn--sm">Add to Calendar</button>
+            </div>
+
+            <button class="btn btn--outline push-down" data-goto="screen-form">
+              Book this again next week
+            </button>
+          </div>
+
+          <nav class="bottom-nav">
+            <button data-goto="screen-listing">Explore</button>
+            <button class="is-active">Bookings</button>
+            <button>Saved</button>
+            <button>Profile</button>
+          </nav>
+        </div>
+      </section>
+    </main>
+
+    <script src="scripts.js"></script>
+  </body>
+</html>
