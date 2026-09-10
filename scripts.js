@@ -1,10 +1,5 @@
 (function () {
   "use strict";
-
-  /* ============================================================
-     DATASET — the 8 spaces from the brief, verbatim.
-     availability: high / medium / low   (drives ranking + copy)
-     ============================================================ */
   var SPACES = [
     { id: "hub-desk-central",   name: "Hub Desk Central",   type: "Desk",    floor: 3,    rating: 4.2, avail: "high",   seats: 1,  photos: 3, reviews: 38 },
     { id: "quiet-focus-pod",    name: "Quiet Focus Pod",    type: "Room",    floor: 5,    rating: 4.8, avail: "low",    seats: 2,  photos: 6, reviews: 61 },
@@ -16,7 +11,7 @@
     { id: "city-shuttle-mini",  name: "City Shuttle Mini",  type: "Minibus", floor: null, rating: 4.5, avail: "high",   seats: 8,  photos: 4, reviews: 40 }
   ];
 
-  var RATE = 18; // flat $ / hour for every space
+  var RATE = 18; 
   var DURATIONS = { "30m": 0.5, "1 hr": 1, "2 hr": 2, "Half day": 4 };
 
   var AVAIL_SCORE = { high: 1, medium: 0.6, low: 0.25 };
@@ -44,7 +39,7 @@
   function money(n) { return "$" + n.toFixed(2); }
   function spaceById(id) {
     for (var i = 0; i < SPACES.length; i++) if (SPACES[i].id === id) return SPACES[i];
-    return SPACES[1]; // Quiet Focus Pod — keeps the original linear demo intact
+    return SPACES[1]; 
   }
   function selectedSpace() { return spaceById(state.selected); }
   function floorLabel(sp) { return sp.floor == null ? "No fixed floor" : "Floor " + sp.floor; }
@@ -52,6 +47,12 @@
   function whenDateLabel() {
     return state.needs && state.needs.when === "Pick date" ? "Tue 9 Sep" : "Today";
   }
+  function modeFromWhen(when) {
+    if (when === "Today PM") return "pm";
+    if (when === "Pick date") return "pick";
+    return "now";
+  }
+  function currentMode() { return modeFromWhen(state.needs && state.needs.when); }
 
   /* ---------- read the needs form ---------- */
   var form = document.getElementById("screen-form");
@@ -101,10 +102,6 @@
     goTo(trigger.getAttribute("data-goto"));
   });
 
-  /* ---------- skip the sign-in screen for visitors who chose an account ---------- */
-  // On the welcome screen every button except "Browse without an account" leads
-  // into the needs form (data-goto="screen-form"). Those visitors are treated as
-  // signed in, so the sign-in step (screen 6) is skipped on the way to booking.
   var authed = false;
   var welcome = document.getElementById("screen-welcome");
   if (welcome) {
@@ -168,16 +165,15 @@
     refreshFormCount();
   }
 
-  /* ============================================================
-     MATCHES SCREEN — smart score + honest trade-off labels
-     ============================================================ */
   var matchListEl = document.querySelector("[data-match-list]");
   var matchTitleEl = document.querySelector('#screen-matches [data-bind="matches-title"]');
   var matchesMetaEl = document.querySelector("#screen-matches .topbar__meta");
 
   function renderMatches() {
     var needs = state.needs || readNeeds();
-    var now = needs.when === "Now";
+    var mode = modeFromWhen(needs.when);
+    var isNow = mode === "now";
+    var isPM = mode === "pm";
 
     if (matchesMetaEl) {
       matchesMetaEl.textContent =
@@ -185,8 +181,7 @@
     }
 
     var pool = poolFor(needs).slice();
-    // "Now" leans hard on availability; planning ahead lets rating lead.
-    var wRating = now ? 0.35 : 0.82;
+    var wRating = isNow ? 0.35 : 0.82;
     pool.forEach(function (sp) {
       sp._score = wRating * (sp.rating / 5) + (1 - wRating) * AVAIL_SCORE[sp.avail];
     });
@@ -220,30 +215,45 @@
 
     matchListEl.innerHTML = top.map(function (sp) {
       var pillClass, pillText, line, cta = "";
+      var lowRated = sp.rating === minRating;
 
       if (sp._stretch) {
         pillClass = "pill--neutral"; pillText = "Stretch";
         line = "Seats " + sp.seats + " — more room than you need";
+
       } else if (sp.rating === maxRating) {
         pillClass = "pill--accent"; pillText = "Best rated";
-        if (sp.avail !== "high" && now) {
+        if (isNow && sp.avail !== "high") {
           line = "Not free now — next slot " + NEXT_SLOT[sp.avail];
           cta =
             '<button class="btn btn--outline btn--sm" data-goto="screen-detail" data-id="' +
             sp.id + '">Hold ' + NEXT_SLOT[sp.avail] + "</button>";
-        } else if (sp.avail === "high") {
+        } else if (isNow) {
           line = "Top rated and free now";
+        } else if (isPM) {
+          line = sp.avail === "low"
+            ? "Top rated — grab an afternoon slot before they go"
+            : "Top rated — afternoon slots open";
         } else {
-          line = "Top rated — reserve ahead to lock it";
+          line = "Top rated — book any slot that day";
         }
+
       } else if (sp.avail === "high") {
-        pillClass = "pill--dark"; pillText = "Free now";
-        line = sp.rating === minRating
-          ? "Lower rated, but yours in ~2 min"
-          : "Free right now";
+        pillClass = "pill--dark";
+        pillText = isNow ? "Free now" : isPM ? "Open all PM" : "Always open";
+        if (isNow) {
+          line = lowRated ? "Lower rated, but yours in ~2 min" : "Free right now";
+        } else if (isPM) {
+          line = lowRated ? "Lower rated, but free all afternoon" : "Free all afternoon";
+        } else {
+          line = lowRated ? "Lower rated, but open whenever you pick" : "Open whenever you pick";
+        }
+
       } else {
         pillClass = "pill--neutral"; pillText = "Good fit";
-        line = AVAIL_WORD[sp.avail] + " availability";
+        line = isNow ? AVAIL_WORD[sp.avail] + " availability"
+             : isPM ? "Limited afternoon slots"
+             : "Books up, but you're planning ahead";
       }
 
       return (
@@ -263,9 +273,6 @@
     }).join("");
   }
 
-  /* ============================================================
-     EXPLORE / LISTING — every space, live filtering + expand
-     ============================================================ */
   var listing = document.getElementById("screen-listing");
   if (listing) {
     var listEl = listing.querySelector("[data-space-list]");
@@ -337,9 +344,6 @@
     render();
   }
 
-  /* ============================================================
-     DETAIL SCREEN + checkout summary
-     ============================================================ */
   var detail = document.getElementById("screen-detail");
   var hoursEl = document.querySelector("[data-hours]");
   var priceEl = document.querySelector(".checkout-bar__price");
@@ -377,13 +381,22 @@
     priceEl.textContent = costText + " · " + s.startText + "–" + s.endText;
   }
 
-  function buildHours(sp) {
+  function buildHours(sp, mode) {
     var HOURS = [9, 10, 11, 12, 13, 14, 15, 16];
-    var openFrom = { high: 9, medium: 13, low: 14 }[sp.avail];
-    var openTo   = { high: 16, medium: 16, low: 15 }[sp.avail];
-    var active   = { high: 10, medium: 13, low: 14 }[sp.avail];
+    var from, to;
+
+    if (mode === "pick") {
+      from = 9; to = 16;
+    } else {
+      from = { high: 9, medium: 13, low: 14 }[sp.avail];
+      to   = { high: 16, medium: 16, low: 15 }[sp.avail];
+      if (mode === "pm") from = Math.max(from, 12);
+    }
+    if (from > to) from = to;
+    var active = mode === "pick" ? 10 : from;
+
     hoursEl.innerHTML = HOURS.map(function (h) {
-      var off = h < openFrom || h > openTo;
+      var off = h < from || h > to;
       var cls = "hour" + (off ? " is-off" : "") + (!off && h === active ? " is-active" : "");
       return '<button class="' + cls + '"' + (off ? " disabled" : "") + ">" + pad(h) + "</button>";
     }).join("");
@@ -392,6 +405,7 @@
   function renderDetail() {
     if (!detail) return;
     var sp = selectedSpace();
+    var mode = currentMode();
     var q = function (sel) { return detail.querySelector(sel); };
 
     q('[data-bind="photo"]').textContent = "Space photo · 1 of " + sp.photos;
@@ -404,10 +418,23 @@
       .map(function (t) { return '<span class="tag">' + t + "</span>"; })
       .join("");
 
-    buildHours(sp);
+    q('[data-bind="avail-heading"]').textContent =
+      mode === "pick" ? "Availability that day"
+      : mode === "pm" ? "Availability this afternoon"
+      : "Availability today";
+
+    buildHours(sp, mode);
 
     var alertEl = q('[data-bind="alert"]');
-    var msg = ALERT[sp.avail];
+    var msg;
+    if (mode === "pick") {
+      msg = sp.avail === "low" ? "Popular — reserve your date early" : "";
+    } else if (mode === "pm") {
+      msg = sp.avail === "low" ? "Only late-afternoon slots left today"
+          : sp.avail === "medium" ? "Afternoon fills up fast" : "";
+    } else {
+      msg = ALERT[sp.avail];
+    }
     alertEl.textContent = msg;
     alertEl.hidden = !msg;
 
@@ -426,9 +453,6 @@
   }
   if (durationGroup) durationGroup.addEventListener("click", refreshSummary);
 
-  /* ============================================================
-     SIGN IN · CONFIRM · BOOKED — carry the real selection through
-     ============================================================ */
   function renderSignin() {
     var el = document.querySelector('#screen-signin [data-bind="held"]');
     if (!el) return;
