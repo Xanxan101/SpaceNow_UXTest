@@ -11,7 +11,7 @@
     { id: "city-shuttle-mini",  name: "City Shuttle Mini",  type: "Minibus", floor: null, rating: 4.5, avail: "high",   seats: 8,  photos: 4, reviews: 40 }
   ];
 
-  var RATE = 18; 
+  var RATE = 18; // flat $ / hour for every space
   var DURATIONS = { "30m": 0.5, "1 hr": 1, "2 hr": 2, "Half day": 4 };
 
   var AVAIL_SCORE = { high: 1, medium: 0.6, low: 0.25 };
@@ -39,17 +39,18 @@
   function money(n) { return "$" + n.toFixed(2); }
   function spaceById(id) {
     for (var i = 0; i < SPACES.length; i++) if (SPACES[i].id === id) return SPACES[i];
-    return SPACES[1]; 
+    return SPACES[1]; // Quiet Focus Pod — keeps the original linear demo intact
   }
   function selectedSpace() { return spaceById(state.selected); }
   function floorLabel(sp) { return sp.floor == null ? "No fixed floor" : "Floor " + sp.floor; }
   function floorShort(sp) { return sp.floor == null ? "no floor" : "F" + sp.floor; }
   function whenDateLabel() {
-    return state.needs && state.needs.when === "Another day" ? "Tue 9 Sep" : "Today";
+    return state.needs && state.needs.when === "Pick date" ? "Tue 9 Sep" : "Today";
   }
+  // "Now" = urgent, "Today PM" = this afternoon, "Pick date" = another day.
   function modeFromWhen(when) {
-    if (when === "Later today") return "pm";
-    if (when === "Another day") return "pick";
+    if (when === "Today PM") return "pm";
+    if (when === "Pick date") return "pick";
     return "now";
   }
   function currentMode() { return modeFromWhen(state.needs && state.needs.when); }
@@ -102,6 +103,10 @@
     goTo(trigger.getAttribute("data-goto"));
   });
 
+  /* ---------- skip the sign-in screen for visitors who chose an account ---------- */
+  // On the welcome screen every button except "Browse without an account" leads
+  // into the needs form (data-goto="screen-form"). Those visitors are treated as
+  // signed in, so the sign-in step (screen 6) is skipped on the way to booking.
   var authed = false;
   var welcome = document.getElementById("screen-welcome");
   if (welcome) {
@@ -165,6 +170,9 @@
     refreshFormCount();
   }
 
+  /* ============================================================
+     MATCHES SCREEN — smart score + honest trade-off labels
+     ============================================================ */
   var matchListEl = document.querySelector("[data-match-list]");
   var matchTitleEl = document.querySelector('#screen-matches [data-bind="matches-title"]');
   var matchesMetaEl = document.querySelector("#screen-matches .topbar__meta");
@@ -181,6 +189,10 @@
     }
 
     var pool = poolFor(needs).slice();
+    // "Now" leans hard on availability. "Today PM" and "Pick date" both mean
+    // "not urgent", so both let rating lead — their *rankings are intentionally
+    // identical*. What separates the two is the detail screen: Today PM shows an
+    // afternoon-only hour grid, Pick date opens the whole of a future day.
     var wRating = isNow ? 0.35 : 0.82;
     pool.forEach(function (sp) {
       sp._score = wRating * (sp.rating / 5) + (1 - wRating) * AVAIL_SCORE[sp.avail];
@@ -273,6 +285,9 @@
     }).join("");
   }
 
+  /* ============================================================
+     EXPLORE / LISTING — every space, live filtering + expand
+     ============================================================ */
   var listing = document.getElementById("screen-listing");
   if (listing) {
     var listEl = listing.querySelector("[data-space-list]");
@@ -344,6 +359,9 @@
     render();
   }
 
+  /* ============================================================
+     DETAIL SCREEN + checkout summary
+     ============================================================ */
   var detail = document.getElementById("screen-detail");
   var hoursEl = document.querySelector("[data-hours]");
   var priceEl = document.querySelector(".checkout-bar__price");
@@ -386,10 +404,12 @@
     var from, to;
 
     if (mode === "pick") {
+      // another day — today's availability doesn't bind, the whole day is open
       from = 9; to = 16;
     } else {
       from = { high: 9, medium: 13, low: 14 }[sp.avail];
       to   = { high: 16, medium: 16, low: 15 }[sp.avail];
+      // "Today PM" clips the grid to the afternoon on top of what's free
       if (mode === "pm") from = Math.max(from, 12);
     }
     if (from > to) from = to;
@@ -453,6 +473,9 @@
   }
   if (durationGroup) durationGroup.addEventListener("click", refreshSummary);
 
+  /* ============================================================
+     SIGN IN · CONFIRM · BOOKED — carry the real selection through
+     ============================================================ */
   function renderSignin() {
     var el = document.querySelector('#screen-signin [data-bind="held"]');
     if (!el) return;
