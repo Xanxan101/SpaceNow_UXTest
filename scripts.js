@@ -45,11 +45,11 @@
   function floorLabel(sp) { return sp.floor == null ? "No fixed floor" : "Floor " + sp.floor; }
   function floorShort(sp) { return sp.floor == null ? "no floor" : "F" + sp.floor; }
   function whenDateLabel() {
-    return state.needs && state.needs.when === "Pick date" ? "Tue 9 Sep" : "Today";
+    return state.needs && state.needs.when === "Another day" ? "Tue 9 Sep" : "Today";
   }
   function modeFromWhen(when) {
-    if (when === "Today PM") return "pm";
-    if (when === "Pick date") return "pick";
+    if (when === "Later today") return "pm";
+    if (when === "Another day") return "pick";
     return "now";
   }
   function currentMode() { return modeFromWhen(state.needs && state.needs.when); }
